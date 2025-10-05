@@ -1,24 +1,46 @@
-// Função para processar os dados importados
-function processarDados(rotas) {
-    const resumo = {};
-
-    // Agrupar pacotes por rota
-    rotas.forEach(item => {
-        if (!resumo[item.rota]) resumo[item.rota] = 0;
-        resumo[item.rota]++;
+// Gera as rotas de A-1 até M-16
+function gerarRotas() {
+    const letras = "ABCDEFGHIJKLM".split("");
+    const rotas = [];
+    letras.forEach(letra => {
+        for (let i = 1; i <= 16; i++) {
+            rotas.push(`${letra}-${i}`);
+        }
     });
+    return rotas;
+}
 
-    // Exibir na tabela
+// Exibe a tabela inicial
+function montarTabela() {
     const tbody = document.querySelector("#rotaTable tbody");
     tbody.innerHTML = "";
-    Object.keys(resumo).forEach(rota => {
+    const rotas = gerarRotas();
+    rotas.forEach(rota => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${rota}</td><td>${resumo[rota]}</td>`;
+        tr.innerHTML = `<td>${rota}</td><td id="${rota.replace("-", "_")}">0</td>`;
         tbody.appendChild(tr);
     });
 }
 
-// Importar arquivo JSON
+// Atualiza contagem de pacotes com base no JSON importado
+function processarDados(dados) {
+    const contagem = {};
+
+    dados.forEach(item => {
+        const rota = item.rota.toUpperCase();
+        if (!contagem[rota]) contagem[rota] = 0;
+        contagem[rota]++;
+    });
+
+    Object.keys(contagem).forEach(rota => {
+        const celula = document.getElementById(rota.replace("-", "_"));
+        if (celula) {
+            celula.textContent = contagem[rota];
+        }
+    });
+}
+
+// Lê o arquivo JSON
 document.getElementById("importFile").addEventListener("change", function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -34,3 +56,6 @@ document.getElementById("importFile").addEventListener("change", function(event)
     };
     reader.readAsText(file);
 });
+
+// Inicializa a tabela ao carregar
+montarTabela();
